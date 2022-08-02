@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="database-test-suite.xml" />
+	<munit:test name="database-test-suite-databaseFlowTest" doc:id="f1e15911-04ae-4a00-adc3-d9be45d47a9e" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="31ddad50-4e7a-4857-a185-7f55a6b393dd" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="7dffbd77-82e0-4143-b8ff-1970868cf97f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json&#10;---&#10;readUrl('classpath://databaseFlowtest\payload.dwl' )]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Event" doc:id="c419ce96-3cc5-44a6-8d18-bb4a3146f3ab" >
+				<munit:payload value='[&#10;    {&#10;        "name": "ganesh",&#10;        "s.no": 1,&#10;        "company": "auropro",&#10;        "adress": "watermark",&#10;        "id": 123&#10;    },&#10;    {&#10;        "name": "revathi",&#10;        "s.no": 2,&#10;        "company": "auropro",&#10;        "adress": "watermark",&#10;        "id": 456&#10;    }&#10;]' />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to databaseFlow" doc:id="f19823a4-6651-4f15-a0d0-687de5746dca" name="databaseFlow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert doc:name="Assert expression" doc:id="edd1b9be-cff5-4bce-bbd3-5faa2b1ac94a" >
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+output application/json
+ ---
+payload must equalTo([
+    {
+        "name": "ganesh",
+        "s.no": 1,
+        "company": "auropro",
+        "adress": "watermark",
+        "id": 123
+    },
+    {
+        "name": "revathi",
+        "s.no": 2,
+        "company": "auropro",
+        "adress": "watermark",
+        "id": 456
+    }
+]
+	
+)]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="database-test-suite-databaseFlowTest1" doc:id="dd6e7dac-5b73-442f-b55c-b219b9cd0544" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="af5fb750-5378-4c0d-9f83-16f0553a6181" processor="on-error-propagate">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="aca97c6c-6d7a-4df2-a328-468ab8e1069b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="ca0b4b44-1a8b-4b24-aa3e-08457deb37ef" />
+			<flow-ref doc:name="Flow-ref to databaseFlow" doc:id="bd83915f-5b84-4867-9d8e-071c28e16b6f" name="databaseFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="a22c0bb3-1d3d-4c86-90e6-b5a8a57d9f68" actual='#["ERROR":"DB_CONECTIVITY"]' expected='#["ERROR":"DB_CONECTIVITY"]' message="fail"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
